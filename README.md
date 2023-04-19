@@ -5,7 +5,7 @@ If you're interested in contributing to the library, feel free to fork this repo
 
 Note that while I will do my best to review pull requests and address issues, this is a personal project and I may not always have the time or resources to respond promptly.
 
-This project is **COMPLETELY** free to use. Anyone can make use of this project for any kind of open source use, so long as said use is also under the GPLv3 license. For more info, consult [LICENSE.md](https://github.com/Hasibix/HasiUtils4J/blob/master/LICENSE.md).
+This project is **COMPLETELY** free to use. Anyone can make use of this project for any kind of open source use, so long as said use is also under the AGPLv3 license. For more info, consult [LICENSE.md](https://github.com/Hasibix/HasiUtils4J/blob/master/LICENSE.md).
 
 Credits:
 
