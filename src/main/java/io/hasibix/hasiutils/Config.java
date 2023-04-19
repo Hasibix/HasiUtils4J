@@ -19,19 +19,19 @@ public class Config {
 
     private static final Yaml yaml = new Yaml();
 
-    public static void Load() {
+    public static void Load(String configPath, String resourceName) {
         try {
-            InputStream inputStream = new FileInputStream(new File("config.yml"));
+            InputStream inputStream = new FileInputStream(new File(configPath));
             data = yaml.load(inputStream);
         } catch (FileNotFoundException e) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             System.err.println("[\033[0;36m" + dtf.format(now) + "\033[0m]" + " [" + "\033[1;31m" + "FATAL\033[0m] " +  "\033[0m[Config]: " + "Config file not found! Creating one..");
             try {
-                File file = new File("config.yml");
+                File file = new File(configPath);
                 if (file.createNewFile()) {
                     FileWriter writer = new FileWriter(file);
-                    String data = GetResourceFileAsString("config.yml");
+                    String data = GetResourceFileAsString(resourceName);
                     writer.write(data);
                     writer.close();
                     System.exit(1);
@@ -43,7 +43,7 @@ public class Config {
         }
     }
 
-    private static String GetResourceFileAsString(String fileName) throws IOException {
+    public static String GetResourceFileAsString(String fileName) throws IOException {
         java.lang.ClassLoader classLoader = java.lang.ClassLoader.getSystemClassLoader();
         try (InputStream is = classLoader.getResourceAsStream(fileName)) {
             if (is == null) return null;

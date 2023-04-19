@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.hasibix.hasiutils</groupId>
+    <groupId>io.hasibix</groupId>
     <artifactId>hasiutils</artifactId>
     <version>v1.0s1</version>
 

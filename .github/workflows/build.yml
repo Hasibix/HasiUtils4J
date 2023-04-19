@@ -22,5 +22,5 @@ jobs:
     - name: Publish JAR
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: PS2Game-Server-V1.0s1
-        path: ./target/ps2s-v1.0s1.jar
+        name: HasiUtils4J-V1.0s1
+        path: ./target/hasiutils-v1.0s1.jar
