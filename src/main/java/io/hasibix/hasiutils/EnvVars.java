@@ -21,7 +21,9 @@ public class EnvVars {
                     if (parts.length == 2) {
                         String key = parts[0].trim();
                         String value = parts[1].trim();
-                        variables.putIfAbsent(key, value);
+                        if(!variables.containsKey(key) && !variables.containsValue(value)) {
+                            variables.put(key, value);
+                        }
                     }
                 }
                 br.close();
