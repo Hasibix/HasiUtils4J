@@ -63,7 +63,7 @@ public class Config {
     }
     
     @SuppressWarnings("unchecked")
-    public static Object get(String key, String position) {
+    public static Object Get(String key, String position) {
         Map<String, Object> map = (Map<String, Object>) data.get(key); 
         return map.get(position);
     }

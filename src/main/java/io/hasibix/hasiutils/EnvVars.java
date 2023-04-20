@@ -3,14 +3,17 @@ package io.hasibix.hasiutils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class EnvVars {
     private static final Logger logger = Logger.of(EnvVars.class);
-    private static Map<String, String> variables;
+    private static Map<String, String> variables = new LinkedHashMap<String, String>();
 
     public static void Load(String envFile, Map<String, String> systemEnv) {
-        variables = systemEnv;
+        systemEnv.forEach((key, value) -> {
+            variables.putIfAbsent(key, value);
+        });
         
         if(!ObjUtils.String.IsEmpty(envFile)) {
             try {
@@ -21,9 +24,7 @@ public class EnvVars {
                     if (parts.length == 2) {
                         String key = parts[0].trim();
                         String value = parts[1].trim();
-                        if(!variables.containsKey(key) && !variables.containsValue(value)) {
-                            variables.put(key, value);
-                        }
+                        variables.putIfAbsent(key, value);
                     }
                 }
                 br.close();

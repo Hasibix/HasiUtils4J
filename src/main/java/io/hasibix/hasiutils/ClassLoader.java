@@ -7,7 +7,7 @@ import com.google.common.reflect.ClassPath;
 
 public class ClassLoader {
     public static Set<Class<?>> LoadFromPackage(String packageName) throws IOException {
-        return ClassPath.from(java.lang.ClassLoader.getSystemClassLoader())
+        return ClassPath.from(Thread.currentThread().getContextClassLoader())
           .getAllClasses()
           .stream()
           .filter(clazz -> clazz.getPackageName()
