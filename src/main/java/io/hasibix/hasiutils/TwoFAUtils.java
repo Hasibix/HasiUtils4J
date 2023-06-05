@@ -1,132 +1,96 @@
 package io.hasibix.hasiutils;
 
-import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.UrlEncodedContent;
 
 public class TwoFAUtils {
-    private static final Logger logger = Logger.of(TwoFAUtils.class);
+	private static final Logger LOGGER = Logger.of(TwoFAUtils.class);
 
-    public static String[] Pair(HttpTransport client, String appName, String appInfo, String secretCode) {
-        HttpRequest request;
+	public static String[] pair(URL url, String appName, String appInfo, String secretCode) {
+		try {
+			String urlString = String.format("%s?%s&%s&%s", url.toString(),
+					"appName=" + URLEncoder.encode(appName, "UTF-8"), "appInfo=" + URLEncoder.encode(appInfo, "UTF-8"),
+					"secretCode=" + URLEncoder.encode(secretCode, "UTF-8"));
 
-        try {
-            request = client.createRequestFactory().buildGetRequest(
-                new GenericUrl(
-                    String.format("%s?%s&%s&%s",
-                        "https://authenticatorapi.com/api.asmx/Pair",
-                        "appName=" + new UrlEncodedContent(appName).toString(),
-                        "appInfo=" + new UrlEncodedContent(appInfo).toString(),
-                        "secretCode=" + new UrlEncodedContent(secretCode).toString() 
-                    )
-                )
-            );
-        } catch (IOException e) {
-            logger.error("An exception occured while trying to create a pairing request!");
-            logger.trace(e);
-            request = null;
-        }
+			try {
+				String response = HttpRequestSender.sendRequest(new URL(urlString));
 
-        HttpResponse response;
+				if (response != null) {
+					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+					DocumentBuilder builder = factory.newDocumentBuilder();
+					Document doc = builder.parse(new InputSource(new StringReader(response)));
 
-        if(request != null) {
-            response = HttpRequestSender.SendAsync(request);
-        } else {
-            response = null;
-        }
+					Element root = doc.getDocumentElement();
 
-        if(response != null) {
-            try {
-                String responseData = response.parseAsString();
+					NodeList manualSetupCodeList = root.getElementsByTagName("ManualSetupCode");
+					Element manualSetupCodeElement = (Element) manualSetupCodeList.item(0);
+					String manualSetupCode = manualSetupCodeElement.getTextContent();
 
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(new InputSource(new StringReader(responseData)));
+					NodeList htmlList = root.getElementsByTagName("Html");
+					Element htmlElement = (Element) htmlList.item(0);
+					String html = htmlElement.getTextContent();
 
-                Element root = doc.getDocumentElement();
+					String qrCodeImageUrl = html.substring(html.indexOf("src='") + "src='".length(),
+							html.indexOf("' border=0"));
 
-                NodeList manualSetupCodeList = root.getElementsByTagName("ManualSetupCode");
-                Element manualSetupCodeElement = (Element) manualSetupCodeList.item(0);
-                String manualSetupCode = manualSetupCodeElement.getTextContent();
+					return new String[] { manualSetupCode, qrCodeImageUrl };
+				} else {
+					LOGGER.error("An error occurred while sending an HTTP request.");
+					return null;
+				}
+			} catch (Exception e) {
+				LOGGER.error("An exception occurred while trying to create a pairing request!");
+				LOGGER.trace(e);
+				return null;
+			}
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Wait what. This shouldn't happen. The encoding type is hard-coded to be set to UTF-8");
+			return null;
+		}
+	}
 
-                NodeList htmlList = root.getElementsByTagName("Html");
-                Element htmlElement = (Element) htmlList.item(0);
-                String html = htmlElement.getTextContent();
+	public static boolean validate(URL url, String pin, String secretCode) {
+		try {
+			String urlString = String.format("%s?%s&%s&%s", url.toString(), "pin=" + URLEncoder.encode(pin, "UTF-8"),
+					"secretCode=" + URLEncoder.encode(secretCode, "UTF-8"));
 
-                String qrCodeImageUrl = html.substring(html.indexOf("src='") + "src='".length(), html.indexOf("' border=0"));
+			try {
+				String response = HttpRequestSender.sendRequest(new URL(urlString));
 
-                List<String> result = new ArrayList<String>(2);
-                result.add(manualSetupCode);
-                result.add(qrCodeImageUrl);
+				if (response != null) {
+					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+					DocumentBuilder builder = factory.newDocumentBuilder();
+					Document doc = builder.parse(new InputSource(new StringReader(response)));
 
-                return result.toArray(new String[2]);
-            } catch (Exception e) {
-                logger.error("An exception occured while trying to create a pairing request!");
-                logger.trace(e);
-            }
-        }
-        return null;
-    }
+					Element root = doc.getDocumentElement();
 
-    public static boolean Validate(HttpTransport client, String pin, String secretCode) {
-        HttpRequest request;
+					NodeList isValidList = root.getElementsByTagName("boolean");
+					Element isValidElement = (Element) isValidList.item(0);
+					boolean isValid = Boolean.parseBoolean(isValidElement.getTextContent());
 
-        try {
-            request = client.createRequestFactory().buildGetRequest(
-                new GenericUrl(
-                    String.format("%s?%s&%s&%s",
-                        "https://authenticatorapi.com/api.asmx/ValidatePin",
-                        "pin=" + new UrlEncodedContent(pin).toString(),
-                        "secretCode=" + new UrlEncodedContent(secretCode).toString()
-                    )
-                )
-            );
-        } catch (IOException e) {
-            logger.error("An exception occured while trying to create a validation check request!");
-            logger.trace(e);
-            request = null;
-        }
-
-        HttpResponse response;
-
-        if(request != null) {
-            response = HttpRequestSender.SendAsync(request);
-        } else {
-            response = null;
-        }
-
-        if(response != null) {
-            try {
-                String responseData = response.parseAsString();
-
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(new InputSource(new StringReader(responseData)));
-
-                Element root = doc.getDocumentElement();
-
-                NodeList isValidList = root.getElementsByTagName("boolean");
-                Element isValidElement = (Element) isValidList.item(0);
-                boolean isValid = Boolean.getBoolean(isValidElement.getTextContent());
-
-                return isValid;
-            } catch (Exception e) {
-                logger.error("An exception occured while trying to create a validation check request!");
-                logger.trace(e);
-            }
-        }
-        return false;
-    }
+					return isValid;
+				} else {
+					LOGGER.error("An error occurred while sending an HTTP request.");
+					return false;
+				}
+			} catch (Exception e) {
+				LOGGER.error("An exception occurred while trying to create a validation check request!");
+				LOGGER.trace(e);
+				return false;
+			}
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Wait what. This shouldn't happen. The encoding type is hard-coded to be set to UTF-8");
+			return false;
+		}
+	}
 }

@@ -1,35 +1,35 @@
 package io.hasibix.hasiutils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.UrlEncodedContent;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
+
+import org.jetbrains.annotations.Nullable;
 
 public class SMSUtils {
-    private static String ApiKey;
-    private static final HttpTransport client = HttpRequestSender.NewClient();
+	private static Logger LOGGER = Logger.of(SMSUtils.class);
+	private static String ApiKey;
 
-    public static void Intialize(String apiKey) {
-        ApiKey = apiKey;
-    }
+	public static void intialize(String apiKey) {
+		ApiKey = apiKey;
+	}
 
-    public static InputStream SendMessage(String message, String sender, String number) {
-		String urlString = String.format("%s?%s&%s&%s&%s",
-            "https://api.txtlocal.com/send/",
-            "apikey=" + new UrlEncodedContent(ApiKey, true),
-            "&message=" + new UrlEncodedContent(message, true).toString(),
-            "&sender=" + new UrlEncodedContent(sender, true).toString(),
-            "&numbers=" + new UrlEncodedContent(number, true).toString()
-        );
-        InputStream result;
+	@Nullable
+	public static String sendMessage(String message, String sender, String number) {
+		try {
+			String urlString = String.format("https://api.txtlocal.com/send/?%s&%s&%s&%s",
+					"apikey=" + URLEncoder.encode(ApiKey, "UTF-8"), "message=" + URLEncoder.encode(message, "UTF-8"),
+					"sender=" + URLEncoder.encode(sender, "UTF-8"), "numbers=" + URLEncoder.encode(number, "UTF-8"));
 
-        try {
-            result = HttpRequestSender.SendAsync(client.createRequestFactory().buildGetRequest(new GenericUrl(urlString))).getContent();
-        } catch (IOException e) {
-            result = null;
-        }
-
-        return result;
-    }
+			try {
+				URL url = new URL(urlString);
+				return HttpRequestSender.sendRequest(url);
+			} catch (Exception e) {
+				return null;
+			}
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Wait what. This shouldn't happen. The encoding type is hard-coded to be set to UTF-8");
+			return null;
+		}
+	}
 }

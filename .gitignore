@@ -1,37 +1,57 @@
-/.env
-/target/
-*/target/**
-**/META-INF/
-!.mvn/wrapper/maven-wrapper.jar
+# gradle
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+.gradle/
+build/
+out/
+classes/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# eclipse
+
+*.launch
+
+# idea
+
+.idea/
 *.iml
 *.ipr
+*.iws
 
-### NetBeans ###
-/nbproject/private/
-/build/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# vscode
 
-/.vscode
-/.vscode/
-/.vscode/*
+.settings/
+.vscode/
+bin/
+.classpath
+.project
 
+# macos
+
+*.DS_Store
+
+# fabric
+
+run/
+
+# java
+
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# others
 /config.yml
 /logs
 /logs/
 /logs/*
+/bin/
+/.env
+/target/
+*/target/**
+**/META-INF/
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build

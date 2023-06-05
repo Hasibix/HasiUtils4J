@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+version = project.version
+group = project.maven_group
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	implementation 'org.json:json:20230227'
+    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-gson:0.11.5'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.zxing:core:3.5.1'
+    implementation 'org.eclipse.jetty:jetty-client:11.0.15'
+    implementation 'org.jetbrains:annotations:21.0.0'
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 17
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${project.archivesBaseName}"}
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+}
