@@ -1,0 +1,5 @@
+workflows:
+  build:
+    scripts:
+      - name: Build
+        script: gradlew clean && gradlew build
